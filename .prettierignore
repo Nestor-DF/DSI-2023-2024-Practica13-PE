@@ -1,6 +1,5 @@
 dist
 .nyc_output
-.github
 .eslintrc.json
 .pretterignore
 .prettierrc.json

@@ -3,148 +3,82 @@ import { expect } from 'chai';
 import request from 'request';
 
 describe('Pruebas de las rutas de la aplicación Express', () => {
-  // Prueba para la ruta GET /cards
-  it('no debería funcionar si el usuario no se da en la query string', (done) => {
-    request.get({ url: 'http://localhost:3000/cards', json: true }, (error: Error, response) => {
-      expect(response.body.status).to.equal('Error');
-      expect(response.body.answer).to.equal('An user has to be provided');
-      done();
-    });
-  });
-  it('debería obtener todas las cartas de un usuario', (done) => {
-    request.get({ url: 'http://localhost:3000/cards?user=juan', json: true }, (error: Error, response) => {
-      expect(response.body.status).to.equal('Success');
-      done();
-    });
-  });
-  it('debería obtener una carta de un usuario', (done) => {
-    request.get({ url: 'http://localhost:3000/cards?user=juan&id=2', json: true }, (error: Error, response) => {
-      expect(response.body.status).to.equal('Success');
-      done();
-    });
-  });
-
-  // Prueba para la ruta POST /cards
-  it('no debería funcionar si el usuario no se da en la query string', (done) => {
-    request.post({ url: 'http://localhost:3000/cards', json: true }, (error: Error, response) => {
-      expect(response.body.status).to.equal('Error');
-      expect(response.body.answer).to.equal('An user has to be provided');
-      done();
-    });
-  });
-  it('debería añadir una carta a un usuario', (done) => {
+  it('post no debería añadir una carta', (done) => {
     const cardToAdd = {
-      id: 55,
-      name: 'Qiyana',
-      manaCost: 6767,
-      color: 'White',
-      type: 'Artifact',
-      rarity: 'Rare',
-      rulesText: 'Tap: ERQWQAA',
-      marketValue: 999,
+      id: 123456,
+      name: 'Lightning Bolt',
+      manaCost: 1,
+      color: 'Red',
+      type: 'Instant',
+      rarity: 'Common',
+      rulesText: 'Lightning Bolt deals 3 damage to any target.',
+      marketValue: 2.5,
     };
     request.post({ url: 'http://localhost:3000/cards?user=juan', json: cardToAdd }, (error: Error, response) => {
-      expect(response.body.status).to.equal('Success');
-      done();
-    });
-  });
-  it('no debería añadir una carta a un usuario si ya existe una con el mismo id', (done) => {
-    const cardToAdd = {
-      id: 2,
-      name: 'Qiyana',
-      manaCost: 6767,
-      color: 'White',
-      type: 'Artifact',
-      rarity: 'Rare',
-      rulesText: 'Tap: ERQWQAA',
-      marketValue: 999,
-    };
-    request.post({ url: 'http://localhost:3000/cards?user=juan', json: cardToAdd }, (error: Error, response) => {
-      expect(response.body.status).to.equal('Error');
-      expect(response.body.answer).to.equal("A card with the same ID already exists in juan's collection");
+      expect(response.statusCode).to.equal(400);
       done();
     });
   });
 
-  // Prueba para la ruta DELETE /cards
-  it('no debería funcionar si el usuario no se da en la query string', (done) => {
-    request.delete({ url: 'http://localhost:3000/cards', json: true }, (error: Error, response) => {
-      expect(response.body.status).to.equal('Error');
-      expect(response.body.answer).to.equal('An user has to be provided');
-      done();
-    });
-  });
-  it('debería eliminar una carta de un usuario', (done) => {
-    request.delete({ url: 'http://localhost:3000/cards?user=juan&id=55', json: true }, (error: Error, response) => {
-      expect(response.body.status).to.equal('Success');
-      expect(response.body.answer).to.equal("Card removed in juan's collection");
-      done();
-    });
-  });
-  it('no debería eliminar una carta de un usuario si no existe', (done) => {
-    request.delete({ url: 'http://localhost:3000/cards?user=juan&id=999', json: true }, (error: Error, response) => {
-      expect(response.body.status).to.equal('Error');
-      expect(response.body.answer).to.equal("Card not found at juan's collection");
+  it('delete valido', (done) => {
+    request.delete({ url: 'http://localhost:3000/cards?id=123456' }, (error: Error, response) => {
+      expect(response.statusCode).to.equal(200);
       done();
     });
   });
 
-  // Prueba para la ruta PATCH /cards
-  it('no debería funcionar si el usuario no se da en la query string', (done) => {
-    request.patch({ url: 'http://localhost:3000/cards', json: true }, (error: Error, response) => {
-      expect(response.body.status).to.equal('Error');
-      expect(response.body.answer).to.equal('An user has to be provided');
+  it('delete no valido (no existe la carta)', (done) => {
+    request.delete({ url: 'http://localhost:3000/cards?id=999' }, (error: Error, response) => {
+      expect(response.statusCode).to.equal(404);
       done();
     });
   });
-  it('debería actualizar una carta a un usuario', (done) => {
+
+  it('post debería añadir una carta', (done) => {
     const cardToAdd = {
-      id: 2,
-      name: 'Qiyana',
-      manaCost: 6767,
-      color: 'White',
-      type: 'Artifact',
-      rarity: 'Rare',
-      rulesText: 'Tap: ERQWQAA',
-      marketValue: 999,
+      id: 123456,
+      name: 'Lightning Bolt',
+      manaCost: 1,
+      color: 'Red',
+      type: 'Instant',
+      rarity: 'Common',
+      rulesText: 'Lightning Bolt deals 3 damage to any target.',
+      marketValue: 2.5,
     };
-    request.patch({ url: 'http://localhost:3000/cards?user=juan&id=2', json: cardToAdd }, (error: Error, response) => {
-      expect(response.body.status).to.equal('Success');
-      expect(response.body.answer).to.equal("Card updated in juan's collection");
+    request.post({ url: 'http://localhost:3000/cards', json: cardToAdd }, (error: Error, response) => {
+      expect(response.statusCode).to.equal(201);
       done();
     });
   });
-  it('no debería actualizar una carta a un usuario si no existe', (done) => {
-    const cardToAdd = {
-      id: 99,
-      name: 'Qiyana',
-      manaCost: 6767,
-      color: 'White',
-      type: 'Artifact',
-      rarity: 'Rare',
-      rulesText: 'Tap: ERQWQAA',
-      marketValue: 999,
-    };
-    request.patch({ url: 'http://localhost:3000/cards?user=juan&id=99', json: cardToAdd }, (error: Error, response) => {
-      expect(response.body.status).to.equal('Error');
-      expect(response.body.answer).to.equal("Card not found at juan's collection");
+
+  it('get id especifico', (done) => {
+    request.get({ url: 'http://localhost:3000/cards?id=123456' }, (error: Error, response) => {
+      expect(response.statusCode).to.equal(200);
       done();
     });
   });
-  it('el id en la query string debe coincidir con el de la carta actualizada', (done) => {
+
+  it('get todas las cartas', (done) => {
+    request.get({ url: 'http://localhost:3000/cards' }, (error: Error, response) => {
+      expect(response.statusCode).to.equal(200);
+      done();
+    });
+  });
+
+  it('get id no existe', (done) => {
+    request.get({ url: 'http://localhost:3000/cards?id=999' }, (error: Error, response) => {
+      expect(response.statusCode).to.equal(404);
+      done();
+    });
+  });
+
+  it('pach id no existe', (done) => {
     const cardToAdd = {
-      id: 88,
-      name: 'Qiyana',
-      manaCost: 6767,
-      color: 'White',
-      type: 'Artifact',
-      rarity: 'Rare',
-      rulesText: 'Tap: ERQWQAA',
-      marketValue: 999,
+      name: 'Qiyanaaaaaa',
+      manaCost: 87,
     };
-    request.patch({ url: 'http://localhost:3000/cards?user=juan&id=99', json: cardToAdd }, (error: Error, response) => {
-      expect(response.body.status).to.equal('Error');
-      expect(response.body.answer).to.equal('The id in the body has to be the same as the one in the query string');
+    request.patch({ url: 'http://localhost:3000/cards?id=00', json: cardToAdd }, (error: Error, response) => {
+      expect(response.statusCode).to.equal(404);
       done();
     });
   });
